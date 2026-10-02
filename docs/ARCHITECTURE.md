@@ -26,7 +26,7 @@ Dependency direction is one way: Controller -> Service -> Repository/Model. Serv
 ```
 app/
   Enums/            Role, UserStatus, CustomerStatus, SubscriptionStatus
-  Exceptions/       DomainException (base) + one class per business rule, Handler wiring
+  Exceptions/       BusinessRuleException (base) + one class per business rule, Handler wiring
   Http/
     Controllers/Api/V1/   AuthController, CompanyController, PlanController, SubscriptionController,
                           UserController, CustomerController, DashboardController
@@ -47,7 +47,7 @@ app/
     ApiResponse.php envelope helper
 database/ migrations, factories, seeders
 tests/ Feature/ (per resource), Unit/ (limits, tenancy, cache keys)
-docker/ entrypoint.sh, nginx conf, postgres init.sql
+docker/ entrypoint.sh, nginx conf, postgres init.sh
 docs/
 ```
 Routes: `routes/api.php`, versioned group `/api/v1`.
@@ -77,7 +77,7 @@ Model::create() -> BelongsToTenant fills company_id from TenantContext
 | Form Request | `app/Http/Requests` | Validation separated from controller | Inline `$request->validate()` |
 | API Resource | `app/Http/Resources` | Stable response shape, never leak `password`/internal columns | `->toArray()` on models |
 | Enum | `Role`, statuses | No magic strings; DB CHECK constraints mirror them | String constants |
-| Domain exceptions | `DomainException` subclasses | Services signal rule violations; one handler maps to `{code, status}` | Returning arrays/booleans for failures |
+| Domain exceptions | `BusinessRuleException` subclasses | Services signal rule violations; one handler maps to `{code, status}` | Returning arrays/booleans for failures |
 | DTO (readonly class) | `CustomerFilters` only | Filter set is used by repository and by the cache key; a typed object avoids array key typos | DTOs for every request |
 
 Deliberately **not** used: DDD folder layers, CQRS, event sourcing, generic repository, service interfaces without a second implementation.
@@ -105,7 +105,7 @@ Flow (inside the service's `DB::transaction`): lock the company's active subscri
 `UsageService` iterates the same tagged checks to build `{resource: {used, limit, percent}}`.
 
 ## 8. Errors
-`DomainException { string $errorCode; int $httpStatus; array $details }`. The exception handler renders every error in one envelope:
+`BusinessRuleException { string $errorCode; int $httpStatus; array $details }`. The exception handler renders every error in one envelope:
 ```json
 { "success": false, "message": "...", "error": { "code": "PLAN_LIMIT_REACHED", "details": {} } }
 ```

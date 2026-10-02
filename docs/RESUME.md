@@ -1,6 +1,6 @@
 # RESUME PROMPT (paste into a new AI session)
 
-You are continuing development of a Laravel 11 multi-tenant SaaS backend (company assessment). The owner commits to Git after every step so the company can see how the project was built.
+You are continuing development of a Laravel 13 multi-tenant SaaS backend (company assessment). The owner commits to Git after every step so the company can see how the project was built.
 
 1. Read in order: `docs/specs/*` (company spec = source of truth), `docs/PLAN.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/CONVENTIONS.md`, `docs/PROGRESS.md`.
 2. Take the first unchecked step in `docs/PROGRESS.md` (roadmap: `docs/PLAN.md` section 13). Do ONLY that step.

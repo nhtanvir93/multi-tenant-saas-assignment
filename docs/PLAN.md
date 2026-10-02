@@ -3,7 +3,7 @@
 Source of truth: `Assessment_1___SaaS_Subscription___Tenant_Management_API.pdf` (company spec). The ChatGPT spec is the same content restated in Bangla/Markdown; no conflicts. Keep both in `docs/specs/`.
 
 ## 1. Stack
-- PHP 8.3, Laravel 11, Sanctum (token auth)
+- PHP 8.4, Laravel 13, Sanctum (token auth)
 - PostgreSQL 16, Redis 7 (cache + queue + rate limiter)
 - Docker Compose: `app` (php-fpm), `nginx`, `postgres`, `redis`, `queue` (worker), `scheduler`
 - Tests: PHPUnit feature + unit tests, separate test DB, runs from clean `docker compose run`
@@ -212,7 +212,7 @@ Order requested by owner: plan -> design patterns -> schema -> API, then CRUD by
 | 0 | Plan & handoff docs | specs, PLAN, CONVENTIONS, PROGRESS, RESUME | n/a | `docs: add specs, project plan and handoff docs` |
 | 1 | Architecture & design patterns | `docs/ARCHITECTURE.md`: layers, folders, patterns + justification, SOLID mapping, tenancy flow | n/a | `docs: add architecture and design pattern decisions` |
 | 2 | Schema design | `docs/DATABASE.md`: ERD, tables, constraints, every index with reason | n/a | `docs: add database schema design` |
-| 3 | Docker + scaffold | Laravel 11, Dockerfile, compose, entrypoint, Makefile, `.env.example`, response envelope, exception handler, `GET /health`, phpunit config | health, envelope shape | `chore: scaffold Laravel with single-command Docker setup` |
+| 3 | Docker + scaffold | Laravel 13, Dockerfile, compose, entrypoint, Makefile, `.env.example`, response envelope, exception handler, `GET /health`, phpunit config | health, envelope shape | `chore: scaffold Laravel with single-command Docker setup` |
 | 4 | Plans (read) | migration, model, seeder (Free/Pro/Enterprise), `GET /plans` | list, seed values | `feat(plans): add plans catalogue endpoint` |
 | 5 | Tenancy core | `TenantContext`, `TenantScope`, `BelongsToTenant`, `SetTenantContext` | scope filters, auto-fill, no context = fail closed | `feat(tenancy): add tenant context and global scope` |
 | 6 | Auth + company registration | migrations companies/users/subscriptions/tokens, `register-company` (transaction: company+owner+Free sub), login, logout, me, login throttle | register, login, logout, bad creds, 401, validation, throttle | `feat(auth): add company registration and token authentication` |
