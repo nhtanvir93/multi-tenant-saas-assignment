@@ -11,7 +11,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 - [x] 1 Architecture & design patterns doc — `docs: add architecture and design pattern decisions`
 - [x] 2 Schema design doc — `docs: add database schema design`
 - [x] 3 (owner-confirmed working; owner's own Docker/config fixes are the baseline) Docker + Laravel scaffold — `chore: scaffold Laravel with single-command Docker setup`
-- [ ] 4 Plans (read) + tests (22 tests green) — `feat(plans): add plans catalogue endpoint`
+- [x] 4 Plans (read) + tests (22 tests green) — `feat(plans): add plans catalogue endpoint`
 - [x] 5 (delivered, awaiting test + commit) Tenancy core + tests — `feat(tenancy): add tenant context and global scope`
 - [ ] 6 Auth + company registration + tests — `feat(auth): add company registration and token authentication`
 - [ ] 7 Company CRUD + policies + tests — `feat(company): add company management with role policies`
