@@ -52,6 +52,7 @@ jobs:
                     \$response = app(\App\Http\Controllers\Api\V1\HealthController::class)();
                     dump(\$response->getStatusCode());
                     dump(\$response->getData(true));
+                  "
 
             - name: Run CI Checks
               run: composer ci:check
