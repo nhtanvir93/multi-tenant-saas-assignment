@@ -2,7 +2,7 @@
 
 You are continuing development of a Laravel 11 multi-tenant SaaS backend (company assessment). The owner commits to Git after every step so the company can see how the project was built.
 
-1. Read in order: `docs/specs/*` (company spec = source of truth), `docs/PLAN.md`, `docs/CONVENTIONS.md`, `docs/PROGRESS.md`.
+1. Read in order: `docs/specs/*` (company spec = source of truth), `docs/PLAN.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/CONVENTIONS.md`, `docs/PROGRESS.md`.
 2. Take the first unchecked step in `docs/PROGRESS.md` (roadmap: `docs/PLAN.md` section 13). Do ONLY that step.
 3. Follow `docs/CONVENTIONS.md`: tenant scoping, thin controllers, services, cache rules, no needless abstraction, CRUD order (migration -> model -> service -> request -> policy -> resource -> controller -> tests).
 3b. Business rules in `docs/PLAN.md` section 5a are mandatory (e.g. subscriptions are upgrade-only, one owner per company, owner protected). Implement each with its error code and a test.
