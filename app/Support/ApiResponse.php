@@ -38,8 +38,8 @@ final class ApiResponse
     }
 
     /**
-     * @param array<string, mixed> $details
-     * @param array<string, string> $headers
+     * @param  array<string, mixed>  $details
+     * @param  array<string, string>  $headers
      */
     public static function error(string $message, string $code, int $status, array $details = [], array $headers = []): JsonResponse
     {

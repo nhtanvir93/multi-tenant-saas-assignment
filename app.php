@@ -29,6 +29,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // One envelope for every error: {success:false, message, error:{code, details?}}
         $exceptions->render(
-            fn (Throwable $e, Request $request) => (new ApiExceptionRenderer())($e, $request)
+            fn (Throwable $e, Request $request) => (new ApiExceptionRenderer)($e, $request)
         );
     })->create();
