@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\PlanController;
 use Illuminate\Support\Facades\Route;
@@ -33,5 +34,10 @@ Route::prefix('v1')->group(function (): void {
             'me',
             [AuthController::class, 'me']
         );
+    });
+
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::get('/company', [CompanyController::class, 'show']);
+        Route::put('/company', [CompanyController::class, 'update']);
     });
 });
