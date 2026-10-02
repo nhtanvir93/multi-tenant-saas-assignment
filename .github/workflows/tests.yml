@@ -46,10 +46,9 @@ jobs:
             - name: Setup Application
               run: composer setup
 
-            - name: Diagnose Redis
+            - name: Diagnose Health Checks
               run: |
-                  php -m | grep -i redis
-                  php artisan tinker --execute="use Illuminate\Support\Facades\Redis; dump(config('database.redis.default')); dump(Redis::connection()->ping());"
+                  php artisan tinker --execute="use Illuminate\Support\Facades\DB; use Illuminate\Support\Facades\Redis; dump(DB::select('select 1')); dump(Redis::connection()->ping());"
 
             - name: Run CI Checks
               run: composer ci:check
