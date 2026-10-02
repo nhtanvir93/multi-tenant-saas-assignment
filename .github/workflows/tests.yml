@@ -46,9 +46,12 @@ jobs:
             - name: Setup Application
               run: composer setup
 
-            - name: Diagnose Health Checks
+            - name: Diagnose Health Controller
               run: |
-                  php artisan tinker --execute="use Illuminate\Support\Facades\DB; use Illuminate\Support\Facades\Redis; dump(DB::select('select 1')); dump(Redis::connection()->ping());"
+                  php artisan tinker --execute="
+                    \$response = app(\App\Http\Controllers\Api\V1\HealthController::class)();
+                    dump(\$response->getStatusCode());
+                    dump(\$response->getData(true));
 
             - name: Run CI Checks
               run: composer ci:check
