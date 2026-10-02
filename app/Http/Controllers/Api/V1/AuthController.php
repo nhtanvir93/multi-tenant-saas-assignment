@@ -12,6 +12,7 @@ use App\Http\Resources\SubscriptionResource;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Services\CompanyRegistrationService;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -31,10 +32,8 @@ final class AuthController extends Controller
 
         $token = $result['user']->createToken('api');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Company registered successfully.',
-            'data' => [
+        return ApiResponse::created(
+            [
                 'company' => new CompanyResource($result['company']),
                 'user' => new UserResource($result['user']),
                 'subscription' => new SubscriptionResource(
@@ -42,7 +41,8 @@ final class AuthController extends Controller
                 ),
                 'token' => $token->plainTextToken,
             ],
-        ], 201);
+            'Company registered successfully.',
+        );
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -52,35 +52,32 @@ final class AuthController extends Controller
             $request->string('password')->toString(),
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful.',
-            'data' => [
+        return ApiResponse::success(
+            [
                 'user' => new UserResource($result['user']),
                 'token' => $result['token'],
             ],
-        ]);
+            'Login successful.',
+        );
     }
 
     public function logout(Request $request): JsonResponse
     {
         $this->authService->logout($request->user());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logged out successfully.',
-            'data' => null,
-        ]);
+        return ApiResponse::success(
+            null,
+            'Logged out successfully.',
+        );
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Authenticated user.',
-            'data' => new UserResource(
+        return ApiResponse::success(
+            new UserResource(
                 $request->user()->load('company')
             ),
-        ]);
+            'Authenticated user.',
+        );
     }
 }
