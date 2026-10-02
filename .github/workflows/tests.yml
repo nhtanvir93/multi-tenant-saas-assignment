@@ -49,7 +49,6 @@ jobs:
             - name: Diagnose Redis
               run: |
                   php -m | grep -i redis
-                  redis-cli -h 127.0.0.1 -p 6379 ping
                   php artisan tinker --execute="dump(config('database.redis.default')); dump(Redis::connection()->ping());"
 
             - name: Run CI Checks
