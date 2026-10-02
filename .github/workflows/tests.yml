@@ -14,8 +14,22 @@ jobs:
         runs-on: ubuntu-latest
 
         services:
+            postgres:
+                image: postgres:16-alpine
+                env:
+                    POSTGRES_DB: app_testing
+                    POSTGRES_USER: app
+                    POSTGRES_PASSWORD: secret
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd "pg_isready -U app -d app_testing"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
             redis:
-                image: redis:8
+                image: redis:7-alpine
                 ports:
                     - 6379:6379
                 options: >-
@@ -23,6 +37,18 @@ jobs:
                     --health-interval 10s
                     --health-timeout 5s
                     --health-retries 5
+
+        env:
+            DB_CONNECTION: pgsql
+            DB_HOST: 127.0.0.1
+            DB_PORT: 5432
+            DB_DATABASE: app_testing
+            DB_USERNAME: app
+            DB_PASSWORD: secret
+
+            REDIS_CLIENT: phpredis
+            REDIS_HOST: 127.0.0.1
+            REDIS_PORT: 6379
 
         steps:
             - name: Checkout code
@@ -45,12 +71,6 @@ jobs:
 
             - name: Setup Application
               run: composer setup
-
-            - name: Diagnose Test Environment
-              run: |
-                  php artisan about
-                  php artisan config:show database
-                  php artisan config:show database.redis
 
             - name: Run CI Checks
               run: composer ci:check
