@@ -10,7 +10,12 @@ class HealthTest extends TestCase
 {
     public function test_health_reports_database_and_redis_up(): void
     {
-        $this->getJson('/api/v1/health')
+        $response = $this->getJson('/api/v1/health');
+
+        dump($response->status());
+        dump($response->json());
+
+        $response
             ->assertOk()
             ->assertExactJson([
                 'success' => true,

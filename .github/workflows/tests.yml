@@ -46,13 +46,11 @@ jobs:
             - name: Setup Application
               run: composer setup
 
-            - name: Diagnose Health Controller
+            - name: Diagnose Test Environment
               run: |
-                  php artisan tinker --execute="
-                    \$response = app(\App\Http\Controllers\Api\V1\HealthController::class)();
-                    dump(\$response->getStatusCode());
-                    dump(\$response->getData(true));
-                  "
+                  php artisan about
+                  php artisan config:show database
+                  php artisan config:show database.redis
 
             - name: Run CI Checks
               run: composer ci:check
