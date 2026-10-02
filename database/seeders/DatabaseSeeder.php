@@ -9,12 +9,11 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Runs on every container start, so it must stay idempotent and only
-     * seed reference data (plans, added in step 4). Demo tenants will live
-     * in a separate, opt-in seeder.
+     * Runs on every container start, so it must stay idempotent and only seed
+     * reference data. Demo tenants will live in a separate, opt-in seeder.
      */
     public function run(): void
     {
-        //
+        $this->call(PlanSeeder::class);
     }
 }
