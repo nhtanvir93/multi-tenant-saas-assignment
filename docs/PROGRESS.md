@@ -1,7 +1,7 @@
 # PROGRESS
 
 Plan approved by owner: **pending**
-Current step: **4** delivered (Plans). Waiting for owner to run `make test` and commit.
+Current step: **5** delivered (Tenancy core). Waiting for owner to run `make test` and commit.
 Last updated: 2026-10-02
 Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` section 13.
 
@@ -11,8 +11,8 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 - [x] 1 Architecture & design patterns doc — `docs: add architecture and design pattern decisions`
 - [x] 2 Schema design doc — `docs: add database schema design`
 - [x] 3 (owner-confirmed working; owner's own Docker/config fixes are the baseline) Docker + Laravel scaffold — `chore: scaffold Laravel with single-command Docker setup`
-- [ ] 4 (delivered, awaiting test + commit) Plans (read) + tests — `feat(plans): add plans catalogue endpoint`
-- [ ] 5 Tenancy core + tests — `feat(tenancy): add tenant context and global scope`
+- [ ] 4 Plans (read) + tests (22 tests green) — `feat(plans): add plans catalogue endpoint`
+- [x] 5 (delivered, awaiting test + commit) Tenancy core + tests — `feat(tenancy): add tenant context and global scope`
 - [ ] 6 Auth + company registration + tests — `feat(auth): add company registration and token authentication`
 - [ ] 7 Company CRUD + policies + tests — `feat(company): add company management with role policies`
 - [ ] 8 Subscription, usage, limit enforcement + tests — `feat(subscription): add plans assignment, usage and limit enforcement`
@@ -27,7 +27,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 ## In progress
 
-(none)
+Step 5 files (new): `app/Support/Tenancy/{TenantContext,TenantScope,BelongsToTenant}.php`, `app/Http/Middleware/SetTenantContext.php`, `app/Exceptions/{TenantContextMissingException,TenantMismatchException}.php`, tests under `tests/{Unit,Feature}/Tenancy/` + `tests/Support/`. One existing file changes: `app/Providers/AppServiceProvider.php` (scoped binding + middleware priority).
 
 ## Decisions log
 
@@ -44,6 +44,10 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 - 2026-10-02: SAFETY GUARD. `tests/TestCase.php::createApplication()` throws if the active database name does not end in `_testing` (tests/Pest.php applies `RefreshDatabase` to every Feature test, i.e. `migrate:fresh`, which wiped the dev DB `app` once). Keep this guard.
 - 2026-10-02: Docker Desktop file-sharing caveat: files replaced on the host with `sed -i` (new inode) can look stale inside the container (the container kept `DB_DATABASE=app` in `.env.testing`/`phpunit.xml`). After such edits verify with `docker compose exec app grep ...`, edit through the container (`docker compose exec app sed -i ...`), or `docker compose restart app`.
 - 2026-10-02: 17 steps / 17 commits; migrations written with the CRUD that needs them; Docker single command with composer.lock-hash auto install.
+- 2026-10-02: Step 5: `TenantContext` is an injected instance bound with `scoped()` (not static state), so it is per request and reset between queued jobs. API: `id()` (throws `TenantContextMissingException`), `idOrNull()`, `has()`, `runAs(id, fn)` (restores the previous tenant in `finally`). No public setter on purpose: a tenant can only be entered through a callback, so it cannot leak into the next unit of work. This refines the `TenantContext::runAs` wording in ARCHITECTURE section 4 (instance call, not a static one).
+- 2026-10-02: Step 5: `BelongsToTenant` fills `company_id` on create, throws `TenantMismatchException` when a different explicit value is given or when it is changed on update, and offers `Model::withoutTenancy()` as the explicit opt-out. `company_id` must never be in `$fillable`. Both exceptions extend `LogicException` (programming errors, not business rules), so the handler renders them as a generic 500.
+- 2026-10-02: Step 5: middleware order. `SetTenantContext` must run BEFORE `SubstituteBindings`, otherwise route model binding of a tenant-scoped model fails closed. The `api` group contains `SubstituteBindings` and wraps the route middleware, so Laravel's default order would run it first. Fixed by registering `SetTenantContext` ahead of `SubstituteBindings` in the kernel middleware priority (AppServiceProvider). Covered by `SetTenantContextTest` (binding own row = 200, other tenant's row = 404).
+- 2026-10-02: Step 5 tests use a throwaway `tenant_probes` table created inside each test (Postgres DDL rolls back with the test transaction) and a test-only `TenantProbe` model, because the real tenant tables arrive in steps 6, 9 and 10.
 
 ## Open decisions awaiting owner
 
@@ -60,4 +64,8 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 3. Docker uses PHP 8.4, CI uses PHP 8.5: align (both 8.4, or both 8.5).
 4. Starter-kit leftovers (Inertia, React/Vite, Fortify, MCP, skeleton Example tests) are not needed for an API-only assessment. Owner decides: keep, or remove in a small `chore:` commit.
 5. Starter migrations (users/sessions/cache/jobs) will run once on Postgres; step 6 replaces them with the project schema (`docs/DATABASE.md`).
-6. Confirm `make test` is green (15 tests) after 1-2.
+
+### Must handle in step 6 (consequences of step 5)
+
+- Sanctum loads the token's user (`tokenable`) BEFORE `SetTenantContext` runs. If `User` uses `BelongsToTenant`, that lookup throws (no context yet). Step 6 must make the token's user lookup bypass the scope (e.g. custom `PersonalAccessToken` model whose `tokenable` relation uses `withoutTenancy()`), and add a test that a valid token authenticates.
+- Login looks the user up by email before any tenant exists: use `User::withoutTenancy()` there. Company registration creates company + owner + subscription inside `TenantContext::runAs($company->id, ...)`.

@@ -11,3 +11,8 @@ parameters:
         - routes/
 
     level: 7
+
+    ignoreErrors:
+        -
+            identifier: trait.unused
+            path: app/Support/Tenancy/BelongsToTenant.php
