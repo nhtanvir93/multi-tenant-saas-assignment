@@ -223,15 +223,20 @@ Volumes: source bind-mounted (`.:/var/www/html`); `vendor` in a named volume (fa
 
 ### Package management
 
-| Need                                  | Command                                                                          | Rebuild image?                               |
-| ------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------- |
-| Add PHP package                       | `docker compose exec app composer require vendor/pkg` (`--dev` for dev-only)     | No. Commit `composer.json` + `composer.lock` |
-| Teammate/reviewer pulls a new package | `docker compose up` (entrypoint sees lock hash changed, runs `composer install`) | No                                           |
-| New PHP extension / system lib        | edit `Dockerfile`                                                                | Yes: `docker compose up --build`             |
+| Need                                       | Command                                                                                              | Rebuild image?                               |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Add PHP package                            | `docker compose exec app composer require vendor/pkg` (`--dev` for dev-only)                         | No. Commit `composer.json` + `composer.lock` |
+| Teammate/reviewer pulls a new package      | `docker compose up` (entrypoint sees lock hash changed, runs `composer install`)                     | No                                           |
+| New PHP extension / system lib             | edit `Dockerfile`                                                                                    | Yes: `docker compose up --build`             |
+| New npm package (starter-kit tooling only) | `docker compose exec app npm install pkg`; entrypoint runs `npm ci` when `package-lock.json` changes | No                                           |
 
 Makefile shortcuts: `make up`, `make down`, `make test`, `make fresh` (migrate:fresh --seed), `make artisan c="route:list"`, `make composer c="require x/y"`, `make logs`.
 Tests: `make test` = `docker compose exec app php artisan test`; uses `app_testing` DB and Redis DB index 1. Cache tests use real Redis; others may use the array driver.
 Prod note (documented only): Dockerfile multi-stage `prod` target with `composer install --no-dev --optimize-autoloader` baked in.
+
+### Baseline note (owner's working setup)
+
+The owner's repo is the source of truth for Docker/config files. Image: PHP 8.4 + Node 24 + gd/mbstring/xml. Tests read `.env.testing` + `phpunit.xml` (target DB `app_testing`, Redis DB 2/3). `config/auth.php` declares the `sanctum` guard. CI: `.github/workflows/tests.yaml`.
 
 ## 13. Delivery roadmap: 17 steps = 17 commits
 

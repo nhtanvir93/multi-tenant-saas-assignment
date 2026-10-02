@@ -41,4 +41,6 @@
 - Dependencies live in `composer.json` + `composer.lock` (both committed). Add packages with `docker compose exec app composer require vendor/pkg` (or `make composer c="require vendor/pkg"`). The entrypoint re-runs `composer install` when `composer.lock` changes, so no image rebuild.
 - PHP extensions/system libs belong in the `Dockerfile` -> rebuild with `--build`.
 - Never commit `vendor/`, `.env`, or volumes. Commit `.env.example` with every variable documented.
-- Tests run inside Docker only: `make test`.
+- Tests run inside Docker only: `make test`. Test settings live in `.env.testing` + `phpunit.xml` and must target the `app_testing` database, never the dev DB.
+- The owner's repo is the source of truth for Docker/config files. Before changing `Dockerfile`, `docker/entrypoint.sh`, `phpunit.xml`, `.env.testing`, `config/*` or CI, read the current repo version; never re-deliver old copies over it.
+- `auth:sanctum` requires the `sanctum` guard declared in `config/auth.php` (already present).
