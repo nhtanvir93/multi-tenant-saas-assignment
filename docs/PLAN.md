@@ -20,9 +20,10 @@ Source of truth: `Assessment_1___SaaS_Subscription___Tenant_Management_API.pdf` 
 - Trade-off documented: shared DB is simpler/cheaper at scale than DB-per-tenant; isolation enforced in app layer + tests.
 
 ## 3. Schema
+Full design with indexes and reasons: `docs/DATABASE.md`.
 ```
 plans(id, slug UQ, name, tier smallint UQ (rank: free=1, pro=2, enterprise=3), price_cents, max_users NULL=unlimited, max_customers NULL=unlimited, features jsonb, is_active, timestamps)
-companies(id, name, slug UQ, owner_id NULL, timestamps, soft deletes)
+companies(id, name, slug UQ, timestamps)  -- owner = user with role='owner' (partial unique index), no circular FK, no soft delete (no delete endpoint)
 subscriptions(id, company_id FK, plan_id FK, status[active|replaced|expired], starts_at, ends_at NULL, timestamps)  -- history kept: upgrade ends old row (replaced) and inserts a new active row
   idx (company_id, status); partial UQ: one active subscription per company
 users(id, company_id FK, name, email UQ(global), password, role[owner|admin|user], status, timestamps)
@@ -148,6 +149,7 @@ GET    /dashboard
 - Document why each is async; retries + backoff + `failed_jobs`.
 
 ## 9. Architecture & patterns
+Full detail: `docs/ARCHITECTURE.md`.
 - Controllers thin -> FormRequest -> Service -> Eloquent/Repository -> Resource.
 - Services: `AuthService`, `CompanyRegistrationService`, `UserService`, `CustomerService`, `SubscriptionService`, `UsageService`, `LimitEnforcer`, `DashboardService`, `CacheService`.
 - Repositories **only** for Customer (heavy filtering + cached decorator). Everything else uses Eloquent directly; justification goes in README.
