@@ -24,7 +24,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 - [x] 6 Auth + company registration + tests — `feat(auth): add company registration and token authentication`
 
-- [ ] 7 Company CRUD + policies + tests — `feat(company): add company management with role policies`
+- [x] 7 Company CRUD + policies + tests — `feat(company): add company management with role policies`
 
 - [ ] 8 Subscription, usage, limit enforcement + tests — `feat(subscription): add plans assignment, usage and limit enforcement`
 

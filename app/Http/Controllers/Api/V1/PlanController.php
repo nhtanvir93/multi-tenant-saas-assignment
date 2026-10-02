@@ -6,20 +6,28 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanResource;
-use App\Services\PlanService;
+use App\Models\Plan;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class PlanController extends Controller
+/**
+ * Provides the readable subscription plan catalogue.
+ */
+final class PlanController extends Controller
 {
-    public function __construct(private readonly PlanService $plans) {}
-
-    /** Public: the plan catalogue is global reference data (needed before registration). */
-    public function __invoke(): JsonResponse
+    /**
+     * Return all active subscription plans ordered by tier.
+     */
+    public function index(): JsonResponse
     {
+        $plans = Plan::query()
+            ->active()
+            ->orderedByTier()
+            ->get();
+
         return ApiResponse::success(
-            PlanResource::collection($this->plans->activePlans())->resolve(),
-            'Plans retrieved.'
+            PlanResource::collection($plans),
+            'Plans retrieved.',
         );
     }
 }
