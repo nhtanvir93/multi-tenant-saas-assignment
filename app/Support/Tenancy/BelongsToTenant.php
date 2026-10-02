@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  *
  * Route model binding goes through the scope, so another tenant's id is a 404.
  * Console/seeders/tests use TenantContext::runAs() or Model::withoutTenancy().
+ *
+ * @mixin Model
  */
 trait BelongsToTenant
 {
