@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Limits\CustomerLimitCheck;
 use App\Limits\LimitCheck;
 use App\Limits\LimitEnforcer;
 use App\Limits\UserLimitCheck;
+use App\Repositories\Contracts\CustomerRepositoryInterface;
+use App\Repositories\EloquentCustomerRepository;
 use App\Services\UsageService;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
@@ -27,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->tag(
             [
                 UserLimitCheck::class,
-                // CustomerLimitCheck::class,
+                CustomerLimitCheck::class,
             ],
             'subscription.limits',
         );
@@ -50,6 +53,18 @@ class AppServiceProvider extends ServiceProvider
 
                 return new UsageService($checks);
             },
+        );
+
+        $this->app->bind(
+            CustomerRepositoryInterface::class,
+            EloquentCustomerRepository::class,
+        );
+
+        $this->app->bind(CustomerLimitCheck::class);
+
+        $this->app->tag(
+            [UserLimitCheck::class, CustomerLimitCheck::class],
+            'subscription.limits',
         );
     }
 

@@ -47,7 +47,11 @@ trait BelongsToTenant
         });
     }
 
-    /** Explicit, greppable opt-out of tenant filtering (auth lookups, admin tooling). */
+    /**
+     * Create a query builder without the tenant global scope.
+     *
+     * @return Builder<static>
+     */
     public static function withoutTenancy(): Builder
     {
         return static::withoutGlobalScope(TenantScope::class);
