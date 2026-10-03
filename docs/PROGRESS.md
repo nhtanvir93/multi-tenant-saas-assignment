@@ -32,7 +32,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 - [x] 10 Customers CRUD + tests — `feat(customers): add customer management with filtering and limits`
 
-- [ ] 11 Dashboard API + tests — `feat(dashboard): add analytics endpoint`
+- [x] 11 Dashboard API + tests — `feat(dashboard): add analytics endpoint`
 
 - [ ] 12 Redis caching + invalidation + tests — `feat(cache): add Redis caching with event-driven invalidation`
 
