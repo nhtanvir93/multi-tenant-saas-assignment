@@ -34,7 +34,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 - [x] 11 Dashboard API + tests — `feat(dashboard): add analytics endpoint`
 
-- [ ] 12 Redis caching + invalidation + tests — `feat(cache): add Redis caching with event-driven invalidation`
+- [x] 12 Redis caching + invalidation + tests — `feat(cache): add Redis caching with event-driven invalidation`
 
 - [ ] 13 Background jobs + tests — `feat(jobs): add queued jobs for notifications and cache warming`
 

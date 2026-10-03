@@ -6,62 +6,66 @@ namespace App\Services;
 
 use App\Enums\Role;
 use App\Models\Customer;
+use App\Models\Subscription;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
- * Builds the tenant dashboard analytics payload.
- *
- * Dashboard data is intentionally DB-backed in this step.
- * Redis caching is introduced in Step 12.
+ * Builds the tenant dashboard with Redis cache-aside and stampede protection.
  */
 final class DashboardService
 {
     public function __construct(
         private readonly UsageService $usageService,
+        private readonly CacheService $cacheService,
     ) {}
 
     /**
-     * Build the dashboard for the authenticated tenant user.
+     * Return the dashboard for the authenticated user.
      *
-     * Owners and admins receive the full analytics payload.
-     * Regular users receive only the summary usage information.
-     *
-     * @return array{
-     *     users: array{
-     *         used: int,
-     *         limit: int|null,
-     *         percent: float|null
-     *     },
-     *     customers: array{
-     *         used: int,
-     *         limit: int|null,
-     *         percent: float|null
-     *     },
-     *     plan: array{
-     *         slug: string,
-     *         name: string
-     *     },
-     *     customer_status?: array{
-     *         active: int,
-     *         inactive: int,
-     *         lead: int
-     *     },
-     *     users_by_role?: array{
-     *         owner: int,
-     *         admin: int,
-     *         user: int
-     *     }
-     * }
+     * @return array<string, mixed>
      */
     public function forUser(User $user): array
     {
-        $usage = $this->usageService->forCompany($user->company);
+        $visibility = (
+            $user->role === Role::Owner
+            || $user->role === Role::Admin
+        )
+            ? 'full'
+            : 'summary';
+
+        $lock = $this->cacheService->dashboardLock();
+
+        return $lock->block(
+            5,
+            fn (): array => $this->cacheService->dashboard(
+                $visibility,
+                fn (): array => $this->buildDashboard($user),
+            ),
+        );
+    }
+
+    /**
+     * Build the dashboard payload from the database.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildDashboard(User $user): array
+    {
+        $usage = $this->usageService->forCompany(
+            $user->company,
+        );
 
         $subscription = $user->company
             ->subscriptions()
             ->with('plan')
             ->where('status', 'active')
-            ->firstOrFail();
+            ->first();
+
+        if ($subscription === null) {
+            throw (new ModelNotFoundException)
+                ->setModel(Subscription::class);
+        }
 
         $data = [
             'users' => $usage['users'],

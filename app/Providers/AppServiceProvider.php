@@ -6,6 +6,13 @@ use App\Limits\CustomerLimitCheck;
 use App\Limits\LimitCheck;
 use App\Limits\LimitEnforcer;
 use App\Limits\UserLimitCheck;
+use App\Models\Customer;
+use App\Models\Subscription;
+use App\Models\User;
+use App\Observers\CustomerObserver;
+use App\Observers\SubscriptionObserver;
+use App\Observers\UserObserver;
+use App\Repositories\CachedCustomerRepository;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\EloquentCustomerRepository;
 use App\Services\UsageService;
@@ -66,6 +73,11 @@ class AppServiceProvider extends ServiceProvider
             [UserLimitCheck::class, CustomerLimitCheck::class],
             'subscription.limits',
         );
+
+        $this->app->bind(
+            CustomerRepositoryInterface::class,
+            CachedCustomerRepository::class,
+        );
     }
 
     /**
@@ -74,6 +86,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        User::observe(UserObserver::class);
+        Customer::observe(CustomerObserver::class);
+        Subscription::observe(SubscriptionObserver::class);
     }
 
     /**
