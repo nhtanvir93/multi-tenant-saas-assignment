@@ -40,7 +40,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 - [x] 14 Rate limiting, hardening, query review + tests — `perf(security): add rate limiting and query optimisation pass`
 
-- [ ] 15 API docs + Postman — `docs(api): add API reference and Postman collection`
+- [x] 15 API docs + Postman — `docs(api): add API reference and Postman collection`
 
 - [ ] 16 README + final verification — `docs: add README and final submission checklist`
 
