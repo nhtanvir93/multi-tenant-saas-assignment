@@ -25,15 +25,17 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/plans', [PlanController::class, 'index']);
 
     Route::prefix('auth')->group(function (): void {
-        Route::post(
-            'register-company',
-            [AuthController::class, 'registerCompany']
-        );
+        Route::middleware('throttle:auth')->group(function (): void {
+            Route::post(
+                'register-company',
+                [AuthController::class, 'registerCompany']
+            );
 
-        Route::post(
-            'login',
-            [AuthController::class, 'login']
-        );
+            Route::post(
+                'login',
+                [AuthController::class, 'login']
+            );
+        });
     });
 
     /*
@@ -48,6 +50,7 @@ Route::prefix('v1')->group(function (): void {
 
     Route::middleware([
         'auth:sanctum',
+        'throttle:api',
         SetTenantContext::class,
     ])->group(function (): void {
         /*

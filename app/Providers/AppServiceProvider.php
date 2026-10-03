@@ -18,8 +18,12 @@ use App\Repositories\EloquentCustomerRepository;
 use App\Services\UsageService;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -87,9 +91,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        $this->configureRateLimiters();
+        $this->configureLazyLoadingProtection();
+
         User::observe(UserObserver::class);
         Customer::observe(CustomerObserver::class);
         Subscription::observe(SubscriptionObserver::class);
+
     }
 
     /**
@@ -111,6 +119,67 @@ class AppServiceProvider extends ServiceProvider
                 ->symbols()
                 ->uncompromised()
             : null,
+        );
+    }
+
+    /**
+     * Configure named application rate limiters.
+     */
+    private function configureRateLimiters(): void
+    {
+        RateLimiter::for('auth', function (Request $request): Limit {
+            $email = mb_strtolower(
+                trim((string) $request->input('email')),
+            );
+
+            return Limit::perMinute(5)->by(
+                sprintf(
+                    '%s|%s',
+                    $request->ip() ?? 'unknown',
+                    $email,
+                ),
+            );
+        });
+
+        RateLimiter::for('api', function (Request $request): Limit {
+            $user = $request->user();
+
+            if ($user instanceof User) {
+                return Limit::perMinute(60)->by(
+                    'user:'.$user->getAuthIdentifier(),
+                );
+            }
+
+            return Limit::perMinute(60)->by(
+                'ip:'.($request->ip() ?? 'unknown'),
+            );
+        });
+
+        RateLimiter::for('exports', function (Request $request): Limit {
+            $user = $request->user();
+
+            if ($user instanceof User) {
+                return Limit::perMinute(10)->by(
+                    'user:'.$user->getAuthIdentifier(),
+                );
+            }
+
+            return Limit::perMinute(10)->by(
+                'ip:'.($request->ip() ?? 'unknown'),
+            );
+        });
+    }
+
+    /**
+     * Prevent accidental lazy-loading during development and tests.
+     *
+     * Production keeps lazy loading enabled to avoid changing runtime
+     * behaviour outside the query-review environment.
+     */
+    private function configureLazyLoadingProtection(): void
+    {
+        Model::preventLazyLoading(
+            app()->runningUnitTests() || ! app()->isProduction(),
         );
     }
 }
