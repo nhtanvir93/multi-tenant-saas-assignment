@@ -36,7 +36,7 @@ Rule: one step = one commit. AI stops after each step. See `docs/PLAN.md` sectio
 
 - [x] 12 Redis caching + invalidation + tests — `feat(cache): add Redis caching with event-driven invalidation`
 
-- [ ] 13 Background jobs + tests — `feat(jobs): add queued jobs for notifications and cache warming`
+- [x] 13 Background jobs + tests — `feat(jobs): add queued jobs for notifications and cache warming`
 
 - [ ] 14 Rate limiting, hardening, query review + tests — `perf(security): add rate limiting and query optimisation pass`
 

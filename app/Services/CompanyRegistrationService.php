@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\Role;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserStatus;
+use App\Jobs\SendWelcomeEmail;
 use App\Models\Company;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -33,7 +34,7 @@ final class CompanyRegistrationService
      */
     public function register(array $data): array
     {
-        return DB::transaction(function () use ($data): array {
+        $result = DB::transaction(function () use ($data): array {
             $company = Company::create([
                 'name' => $data['company_name'],
                 'slug' => Str::lower($data['company_slug']),
@@ -72,8 +73,16 @@ final class CompanyRegistrationService
                         'user' => $user,
                         'subscription' => $subscription,
                     ];
-                }
+                },
             );
         });
+
+        // ✅ Transaction committed successfully.
+        SendWelcomeEmail::dispatch(
+            $result['company']->id,
+            $result['user']->id,
+        );
+
+        return $result;
     }
 }

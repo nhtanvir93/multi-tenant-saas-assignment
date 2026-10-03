@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\SubscriptionStatus;
 use App\Exceptions\BusinessRuleException;
+use App\Jobs\WarmTenantCache;
 use App\Models\Plan;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ final class SubscriptionService
         Subscription $subscription,
         int $targetPlanId,
     ): Subscription {
-        return DB::transaction(function () use (
+        $newSubscription = DB::transaction(function () use (
             $subscription,
             $targetPlanId,
         ): Subscription {
@@ -91,5 +92,9 @@ final class SubscriptionService
 
             return $newSubscription->load('plan');
         });
+
+        WarmTenantCache::dispatch($newSubscription->company_id);
+
+        return $newSubscription;
     }
 }

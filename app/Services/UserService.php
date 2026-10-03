@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\Role;
 use App\Enums\UserStatus;
 use App\Exceptions\BusinessRuleException;
+use App\Jobs\SendUserInvitation;
 use App\Limits\LimitEnforcer;
 use App\Models\Company;
 use App\Models\User;
@@ -48,7 +49,7 @@ final class UserService
             );
         }
 
-        return DB::transaction(function () use (
+        $user = DB::transaction(function () use (
             $company,
             $data,
             $limitEnforcer,
@@ -64,6 +65,14 @@ final class UserService
                 'status' => UserStatus::Active,
             ]);
         });
+
+        // ✅ Transaction committed successfully.
+        SendUserInvitation::dispatch(
+            $company->id,
+            $user->id,
+        );
+
+        return $user;
     }
 
     /**
